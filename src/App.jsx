@@ -18,8 +18,7 @@ const TWITCASTING_BASE_URL = "https://apiv2.twitcasting.tv";
 const API_VERSION = "2.0";
 
 // OAuth設定（実際の使用時にはクライアントIDを設定してください）
-const CLIENT_ID =
-  "g114120547100066491615.8c230b2eaec60508c9fea565582215c41f8ce203a188e7d5eab51014bb97c95d"; // 実際のクライアントIDに置き換えてください
+const CLIENT_ID = "Your-client-id"; // 実際のクライアントIDに置き換えてください
 
 function App() {
   const [accessToken, setAccessToken] = useState(null);
