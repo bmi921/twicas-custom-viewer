@@ -46,6 +46,7 @@ export default function Home() {
   const [categories, setCategories] = useState<any[]>([]);
   const [liveMoviesByCategory, setLiveMoviesByCategory] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [liveKawaiiMovies, setLiveKawaiiMovies] = useState<any[]>([]);
 
   // URLフラグメントからアクセストークンを取得
   useEffect(() => {
@@ -176,12 +177,43 @@ export default function Home() {
         true
       );
       setLiveMoviesByCategory(data.movies || []);
-      console.log(data.movies);
     } catch (err: any) {
       setError(
         `カテゴリ「${categoryId}」のライブ検索に失敗しました: ${err.message}`
       );
       setLiveMoviesByCategory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 可愛い配信を検索する
+  const searchLiveKawaiiMovies = async () => {
+    const categories = [
+      "girls_healingvoice_jp",
+      "girls_cutevoice_jp",
+      "girls_animation_jp",
+    ];
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let kawaiiMovies: Movie[] = [];
+
+      for (const categoryId of categories) {
+        const data = await apiCall(
+          `/search/lives?type=category&context=${categoryId}&lang=ja&limit=100`,
+          true
+        );
+        if (data.movies) {
+          kawaiiMovies = kawaiiMovies.concat(data.movies);
+        }
+      }
+      setLiveKawaiiMovies(kawaiiMovies || []);
+    } catch (err: any) {
+      setError(`可愛い配信の取得に失敗しました: ${err.message}`);
+      setLiveKawaiiMovies([]);
     } finally {
       setLoading(false);
     }
@@ -200,6 +232,7 @@ export default function Home() {
     if (accessToken) {
       fetchUserInfo();
       fetchCategories();
+      searchLiveKawaiiMovies();
     }
   }, [accessToken]);
 
@@ -400,6 +433,70 @@ export default function Home() {
                 </CardContent>
               </Card>
             )}
+
+            {/* 可愛い配信を見つける */}
+            {/* {liveKawaiiMovies.length > 0 && ( */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="h-5 w-5" />
+                  可愛い配信者
+                </CardTitle>
+                <CardDescription>
+                  配信中の可愛いライブ配信を表示します
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center items-center h-20">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                  </div>
+                ) : liveKawaiiMovies.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
+                    {liveKawaiiMovies.map(({ movie, broadcaster }) => (
+                      <a
+                        key={movie.id}
+                        href={movie.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <div className="overflow-hidden h-full flex bg-card text-card-foreground flex-col rounded-xl border shadow-sm">
+                          {movie.large_thumbnail && (
+                            <img
+                              src={movie.large_thumbnail}
+                              alt={movie.title}
+                              className="w-full h-48 rounded-lg object-cover"
+                            />
+                          )}
+                          <CardContent className="p-4 flex-grow">
+                            <div className="flex flex-col h-full">
+                              <div className="flex-grow">
+                                <h4 className="font-semibold text-sm mb-1 line-clamp-2">
+                                  {movie.title}
+                                </h4>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-1">
+                                  {broadcaster.name} (@{broadcaster.screen_id})
+                                </p>
+                              </div>
+                              <div className="text-xs text-gray-500 space-y-1 mt-auto flex flex-row gap-2">
+                                <div>視聴: {movie.current_view_count}</div>
+                                <div>コメント: {movie.comment_count}</div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 mt-4">
+                    選択されたカテゴリに配信中のライブは見つかりませんでした。
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            {/* )} */}
 
             {/* 現在のライブ情報 */}
             {currentLive && (
