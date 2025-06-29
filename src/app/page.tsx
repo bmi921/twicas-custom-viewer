@@ -19,14 +19,7 @@ import {
 } from "@/components/ui/accordion";
 
 import { Loader2, UserIcon, Video, Clock } from "lucide-react";
-import {
-  OAuthToken,
-  User,
-  Movie,
-  CurrentLiveResponse,
-  UserMoviesResponse,
-  Category,
-} from "@/types/types";
+import { User, Movie } from "@/types/types";
 
 // TwitCasting API設定
 const TWITCASTING_BASE_URL = "https://apiv2.twitcasting.tv";
@@ -193,6 +186,9 @@ export default function Home() {
       "girls_healingvoice_jp",
       "girls_cutevoice_jp",
       "girls_animation_jp",
+      "girls_jcjk_jp",
+      "girls_talk_jp",
+      "girls_all_jp",
     ];
 
     setLoading(true);
@@ -210,7 +206,26 @@ export default function Home() {
           kawaiiMovies = kawaiiMovies.concat(data.movies);
         }
       }
-      setLiveKawaiiMovies(kawaiiMovies || []);
+
+      // iskawaiiにPOSTして判定する
+      const response = await fetch("/api/iskawaii", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(kawaiiMovies),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `APIエラー: ${response.status} ${response.statusText} - ${
+            errorData.message || "不明なエラー"
+          }`
+        );
+      }
+      const filteredKawaiiMovies = await response.json();
+      setLiveKawaiiMovies(filteredKawaiiMovies || []);
     } catch (err: any) {
       setError(`可愛い配信の取得に失敗しました: ${err.message}`);
       setLiveKawaiiMovies([]);
@@ -440,10 +455,10 @@ export default function Home() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
-                  可愛い配信者
+                  可愛い過疎配信者
                 </CardTitle>
                 <CardDescription>
-                  配信中の可愛いライブ配信を表示します
+                  配信中の可愛い過疎配信を表示します
                 </CardDescription>
               </CardHeader>
               <CardContent>
