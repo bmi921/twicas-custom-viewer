@@ -10,8 +10,8 @@ git clone https://github.com/bmi921/twicas-custom-viewer
 cd twicas-custom-viewer
 npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.   
+`.env`に`NEXT_PUBLIC_TWICAS_CLIENT_ID=<YOUR_ID>`を追加してください。[開発者API](https://twitcasting.tv/indexapi.php)からIDは取得できます。   
 
 # ✨ Planned Features
 
